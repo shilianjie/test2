@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+namespace:用来隔离sql语句的
+对一张表的操作的sql语句全部都封装到一个sql映射 文件。
+每一个sql语句对应一个mappedstatement对象  要给他指定惟一的id
+-->
+<mapper namespace="com.ssm.mapper.UserMapper">
+
+
+    <select id="selectList" resultType="user">
+        select  * from users
+    </select>
+    <!--1.嵌套结果映射-->
+    <select id="selcetOrderWithUser" resultMap="ordersUserMap">
+        select * from orders as o left join users as u on o.uid=u.uid
+    </select>
+
+    <resultMap id="ordersUserMap" type="ordersexpand">
+        <id column="oid" property="oid"/>
+        <result column="oname" property="oname"/>
+        <result column="price" property="price"/>
+        <association property="user" column="uid" javaType="user" resultMap="userMap"/>
+
+
+    </resultMap>
+
+    <resultMap id="userMap" type="user">
+        <id column="uid" property="uid"/>
+        <result column="uanme" property="uanme"/>
+        <result column="sex" property="sex"/>
+        <result column="birthday" property="birthday"/>
+    </resultMap>
+    <resultMap id="orders" type="orders">
+    <id column="oid" property="oid"/>
+    <result column="oname" property="oname"/>
+    <result column="price" property="price"/>
+    <result column="uid" property="uid"/>
+</resultMap>
+<!--2.嵌套查询映射-->
+    <select id="selcetOrderWithUser2" resultMap="ordersUserMap2">
+      select * from orders
+    </select>
+    <resultMap id="ordersUserMap2" type="ordersexpand" extends="orders">
+        <association property="user" column="uid" javaType="user" select="queryUserById"/>
+    </resultMap>
+    <select id="queryUserById" parameterType="int" resultMap="userMap">
+        select * from users where  uid=#{uid}
+    </select>
+
+    <!--查询两个表-->
+    <select id="selcetOrderWithUser3" resultType="ordersUser">
+        select * from orders as o left join users as u on o.uid=u.uid
+    </select>
+    
+</mapper>
